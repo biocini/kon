@@ -228,6 +228,7 @@ class Kon(CommandsMixin, SessionUIMixin, App[None]):
     def _apply_theme(self, theme_id: str) -> None:
         type(self).CSS = get_styles()
         self.refresh_css(animate=False)
+        self.query_one("#input-box", InputBox).refresh_theme()
         self._apply_thinking_level_style(self._runtime.thinking_level)
 
     @property

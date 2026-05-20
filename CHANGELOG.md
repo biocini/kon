@@ -6,6 +6,23 @@ All notable changes to this project will be documented in this file.
 
 - No changes yet.
 
+## 0.3.10 - 2026-05-21
+
+### Added
+
+- Increased completion popup rows from 5 to 8.
+
+### Changed
+
+- Redesigned the editor to match user message styling with panel user background and prefix.
+- Reordered the info bar to show provider, model, and thinking state.
+
+### Fixed
+
+- Stabilized completion popup scrolling.
+- Reverted textual image display to avoid freezing issues.
+- Corrected the image resize test expectation.
+
 ## 0.3.9 - 2026-05-20
 
 ### Added

@@ -759,7 +759,7 @@ wheels = [
 
 [[package]]
 name = "kon-coding-agent"
-version = "0.3.9"
+version = "0.3.10"
 source = { editable = "." }
 dependencies = [
     { name = "aiofiles" },

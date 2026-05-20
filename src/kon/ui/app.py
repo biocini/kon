@@ -490,21 +490,38 @@ class Kon(CommandsMixin, SessionUIMixin, App[None]):
     # Completion message handlers
     # -------------------------------------------------------------------------
 
+    def _is_chat_at_bottom(self) -> bool:
+        chat = self.query_one("#chat-log", ChatLog)
+        return abs(chat.max_scroll_y - chat.scroll_y) < 1
+
+    def _restore_chat_scroll_if_needed(self, was_at_bottom: bool) -> None:
+        # The completion list is a normal grid row, not a true overlay. Showing or
+        # hiding it changes the available height for ChatLog. When the chat is
+        # already bottom-aligned, that resize can leave the viewport briefly at an
+        # intermediate scroll offset and cause a visible flicker. Restore the
+        # bottom scroll position after Textual has applied the layout change.
+        if was_at_bottom:
+            chat = self.query_one("#chat-log", ChatLog)
+            chat.scroll_end(animate=False)
+
     @on(InputBox.CompletionUpdate)
     def on_completion_update(self, event: InputBox.CompletionUpdate) -> None:
         if self._selection_mode is not None:
             return
 
         completion_list = self.query_one("#completion-list", FloatingList)
+        was_at_bottom = self._is_chat_at_bottom()
         if completion_list.is_visible:
             completion_list.update_items(event.items)
         else:
             completion_list.show(event.items)
+        self.call_after_refresh(lambda: self._restore_chat_scroll_if_needed(was_at_bottom))
 
     @on(InputBox.CompletionHide)
     def on_completion_hide(self, event: InputBox.CompletionHide) -> None:
         completion_list = self.query_one("#completion-list", FloatingList)
         input_box = self.query_one("#input-box", InputBox)
+        was_at_bottom = self._is_chat_at_bottom()
 
         with self.batch_update():
             completion_list.hide()
@@ -522,6 +539,8 @@ class Kon(CommandsMixin, SessionUIMixin, App[None]):
                 self._reset_ctrl_d_delete_state()
 
             input_box.set_completing(False)
+
+        self.call_after_refresh(lambda: self._restore_chat_scroll_if_needed(was_at_bottom))
 
     @on(InputBox.CompletionSelect)
     def on_completion_select(self, event: InputBox.CompletionSelect) -> None:

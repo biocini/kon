@@ -244,7 +244,9 @@ async def test_stream_emits_stream_error_and_records_fallback_on_mid_stream_ws_f
 
 
 @pytest.mark.asyncio
-async def test_stream_does_not_replay_sse_after_raw_websocket_event(monkeypatch):
+async def test_stream_falls_back_to_sse_after_raw_websocket_event_without_stream_parts(
+    monkeypatch,
+):
     provider = OpenAICodexResponsesProvider(
         ProviderConfig(session_id="session-raw-start", model="gpt-5.4")
     )
@@ -256,8 +258,9 @@ async def test_stream_does_not_replay_sse_after_raw_websocket_event(monkeypatch)
         raise CodexTransportError("closed after create")
         yield
 
-    def sse_events(*args, **kwargs):
-        pytest.fail("SSE fallback should not replay after a raw websocket event")
+    async def sse_events(*args, **kwargs):
+        yield {"type": "response.output_text.delta", "delta": "ok"}
+        yield {"type": "response.completed", "response": {"status": "completed"}}
 
     monkeypatch.setattr(provider, "_stream_websocket_events", ws_events)
     monkeypatch.setattr(provider, "_stream_sse_events", sse_events)
@@ -276,9 +279,10 @@ async def test_stream_does_not_replay_sse_after_raw_websocket_event(monkeypatch)
         )
     ]
 
-    assert len(parts) == 1
-    assert isinstance(parts[0], StreamError)
-    assert "closed after create" in parts[0].error
+    assert len(parts) == 2
+    assert isinstance(parts[0], TextPart)
+    assert parts[0].text == "ok"
+    assert isinstance(parts[1], StreamDone)
     assert "session-raw-start" in _WS_FALLBACK_SESSIONS
 
 

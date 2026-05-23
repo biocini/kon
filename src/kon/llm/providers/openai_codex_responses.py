@@ -361,18 +361,12 @@ class OpenAICodexResponsesProvider(BaseProvider):
 
         if session_id not in _WS_FALLBACK_SESSIONS:
             emitted = False
-            websocket_started = False
-
-            def mark_websocket_started(_event: dict[str, Any]) -> None:
-                nonlocal websocket_started
-                websocket_started = True
-
             try:
                 websocket_events = self._stream_websocket_events(
                     body,
                     self._build_websocket_headers(token, account_id),
                     session_id=session_id,
-                    on_event=mark_websocket_started,
+                    on_event=lambda _event: None,
                 )
                 async for part in self._process_codex_events(websocket_events, llm_stream):
                     emitted = True
@@ -384,7 +378,7 @@ class OpenAICodexResponsesProvider(BaseProvider):
             except (CodexTransportError, aiohttp.ClientError, OSError, TimeoutError) as e:
                 if session_id:
                     _WS_FALLBACK_SESSIONS.add(session_id)
-                if emitted or websocket_started:
+                if emitted:
                     yield StreamError(error=_format_provider_error(e))
                     return
 

@@ -3,11 +3,11 @@ config_version = 6
 
 [llm]
 default_provider = "openai-codex" # "zhipu", "github-copilot", "openai-codex"
-default_model = "gpt-5.4"
+default_model = "gpt-5.5"
 # Optional API base URL override for the selected provider or local/self-hosted endpoint.
 # Leave empty to use the provider's default URL.
 default_base_url = ""
-default_thinking_level = "high"
+default_thinking_level = "low"
 # Abort a tool call if it stays idle for this long during a turn.
 # Helps prevent stalled tool executions from hanging the agent loop.
 tool_call_idle_timeout_seconds = 180

@@ -158,8 +158,13 @@ async def test_stream_impl_raises_when_openai_credentials_are_invalid(monkeypatc
 
     monkeypatch.setattr(codex_provider, "get_valid_openai_credentials", fake_get_valid_credentials)
 
-    with pytest.raises(RuntimeError, match="Not logged in to OpenAI"):
+    with pytest.raises(RuntimeError) as exc_info:
         await provider._stream_impl([])
+
+    message = str(exc_info.value)
+    assert "Not logged in to OpenAI" in message
+    assert "~/.config/kon/config.toml" in message
+    assert "deepseek/deepseek-v4" in message
 
 
 @pytest.mark.asyncio

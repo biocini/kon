@@ -220,7 +220,12 @@ class OpenAICodexResponsesProvider(BaseProvider):
     ) -> LLMStream:
         creds = await get_valid_openai_credentials()
         if not creds:
-            raise RuntimeError("Not logged in to OpenAI. Use /login to authenticate.")
+            raise RuntimeError(
+                "Not logged in to OpenAI. Use /login to authenticate. "
+                "If you are using an OpenAI-compatible API key instead, select a supported "
+                "provider/model such as deepseek/deepseek-v4 and set it as the default in "
+                "~/.config/kon/config.toml."
+            )
 
         llm_stream = LLMStream()
         llm_stream.set_iterator(

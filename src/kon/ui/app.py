@@ -362,15 +362,13 @@ class Kon(CommandsMixin, SessionUIMixin, App[None]):
         chat = self.query_one("#chat-log", ChatLog)
         chat.add_session_info(VERSION)
 
-        if self._runtime.agent:
+        if self._runtime.context:
             chat.add_loaded_resources(
-                context_paths=[
-                    format_path(f.path) for f in self._runtime.agent.context.agents_files
-                ],
-                skills=self._runtime.agent.context.skills,
+                context_paths=[format_path(f.path) for f in self._runtime.context.agents_files],
+                skills=self._runtime.context.skills,
                 tools=self._runtime.tools,
             )
-            for path, message in self._runtime.agent.context.skill_warnings:
+            for path, message in self._runtime.context.skill_warnings:
                 self._add_launch_warning(f"Skill warning in {format_path(path)}: {message}")
 
         if init_result.provider_error:
@@ -686,12 +684,10 @@ class Kon(CommandsMixin, SessionUIMixin, App[None]):
         input_box.set_completing(False)
         await chat.remove_all_children()
         chat.add_session_info(getattr(self, "VERSION", ""))
-        if self._runtime.agent:
+        if self._runtime.context:
             chat.add_loaded_resources(
-                context_paths=[
-                    format_path(f.path) for f in self._runtime.agent.context.agents_files
-                ],
-                skills=self._runtime.agent.context.skills,
+                context_paths=[format_path(f.path) for f in self._runtime.context.agents_files],
+                skills=self._runtime.context.skills,
                 tools=self._runtime.tools,
             )
         if self._runtime.session:

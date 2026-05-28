@@ -83,6 +83,7 @@ class ConversationRuntime:
         self.provider: BaseProvider | None = None
         self.session: Session | None = None
         self.agent: Agent | None = None
+        self.context: Context | None = None
 
     def resolve_system_prompt(
         self, session: Session | None = None, context: Context | None = None
@@ -139,6 +140,7 @@ class ConversationRuntime:
     ) -> RuntimeInitResult:
         session: Session | None = None
         context = Context.load(self.cwd)
+        self.context = context
         model = self.model
         model_provider = self.model_provider
         base_url_override = self.base_url
@@ -428,6 +430,9 @@ class ConversationRuntime:
     def reload_context(self) -> None:
         if self.agent is not None:
             self.agent.reload_context()
+            self.context = self.agent.context
+        else:
+            self.context = Context.load(self.cwd)
 
     def latest_assistant_usage_tokens(self) -> int:
         if self.session is None:

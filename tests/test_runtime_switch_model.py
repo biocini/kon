@@ -77,6 +77,7 @@ def test_initialize_creates_openai_codex_agent_without_credentials(tmp_path, mon
     assert runtime.provider is not None
     assert runtime.session is not None
     assert runtime.agent is not None
+    assert runtime.context is not None
 
 
 def test_switch_model_recreates_provider_when_openai_compatible_base_url_changes(monkeypatch):
